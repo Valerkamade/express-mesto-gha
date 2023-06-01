@@ -1,7 +1,9 @@
-const Card = require('../models/card');
-const ERROR_INCORRECT_DATA = 400;
-const ERROR_NOT_FOUND = 404;
-const ERROR_DEFAULT = 500;
+const Card = require('../models/card'); 
+const {
+  ERROR_INCORRECT_DATA,
+  ERROR_NOT_FOUND,
+  ERROR_DEFAULT
+} = require('../errors/errors')
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -17,7 +19,7 @@ module.exports.createCard = (req, res) => {
   Card.create({ name, link, owner: _id })
     .then(card => res.send(card))
     .catch(err => {
-      if (!name || !link) {
+      if (!name || !link || err.message) {
         res.status(ERROR_INCORRECT_DATA)
           .send({ message: `Переданы некорректные данные при создании пользователя` });
         return;
@@ -36,11 +38,11 @@ module.exports.likeCard = (req, res) => {
     { new: true })
     .then(card => res.send(card))
     .catch(err => {
-      if (!Card[_id]) {
+      if (!Card[cardId]) {
         res.status(ERROR_NOT_FOUND)
-          .send({ message: `Передан не существующий id:${_id} карточки` });
+          .send({ message: `Передан не существующий id:${cardId} карточки` });
         return;
-      } else if (!id) {
+      } else if (!cardId) {
         res.status(ERROR_INCORRECT_DATA)
           .send({ message: `Переданы некорректные данные для постановки лайка` });
         return;
