@@ -38,11 +38,13 @@ module.exports.likeCard = (req, res) => {
     { new: true })
     .then(card => res.send(card))
     .catch(err => {
+      console.log(err);
       if (!Card[cardId]) {
         res.status(ERROR_NOT_FOUND)
-          .send({ message: `Передан не существующий id:${cardId} карточки` });
+          // .send({ message: `Передан не существующий id:${cardId} карточки` });
+           .send({ message: Card.likes });
         return;
-      } else if (!cardId) {
+      } else if (!Card[cardId]) {
         res.status(ERROR_INCORRECT_DATA)
           .send({ message: `Переданы некорректные данные для постановки лайка` });
         return;

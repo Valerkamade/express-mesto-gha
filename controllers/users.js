@@ -30,7 +30,7 @@ module.exports.getUser = (req, res) => {
     .catch(err => {
       if (!User[userId]) {
         res.status(ERROR_INCORRECT_DATA)
-          .send({ message: `Пользователь по указанному id: ${userId} не найден` });
+          .send({ message: `Переданы некорректные данные для запроса пользователя` });
         return;
       } else {
         res.status(ERROR_DEFAULT)
@@ -46,19 +46,19 @@ module.exports.createUser = (req, res) => {
       res.send(user)
     })
     .catch(err => {
-      if (!name || !about || !avatar) {
+      if (!name || !about || !avatar || err.message) {
         res.status(ERROR_INCORRECT_DATA)
           .send({ message: `Переданы некорректные данные при создании пользователя` });
         return;
-      } else if (err.message) {
-        res.status(ERROR_INCORRECT_DATA)
-          .send({
-            messsage: Object.keys(err.errors).reduce((acc, key) => {
-              acc.push(err.errors[`${key}`].message);
-              return acc
-            }, []).join('. ')
-          })
-        return;
+      // } else if (err.message) {
+      //   res.status(ERROR_INCORRECT_DATA)
+      //     .send({
+      //       messsage: Object.keys(err.errors).reduce((acc, key) => {
+      //         acc.push(err.errors[`${key}`].message);
+      //         return acc
+      //       }, []).join('. ')
+      //     })
+      //   return;
       } else {
         res.status(ERROR_DEFAULT)
           .send({ message: err.message })
