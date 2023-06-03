@@ -85,15 +85,14 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
-        res.send({ message: `Карточка с указанным id: ${cardId} не найдена` });
-        return
+        return res.status(ERROR_NOT_FOUND).send({ message: `Карточка с указанным id: ${cardId} не найдена` });
       }
       res.send({ message: "Пост удалён" })
     })
     .catch(() => {
       if (!Card[cardId]) {
-        res.status(ERROR_NOT_FOUND)
-          .send({ message: `Карточка с указанным id: ${cardId} не найдена` })
+        res.status(ERROR_INCORRECT_DATA)
+          .send({ message: `Переданы некорректные данные для удаления карточки` });
       }
     });
 };
