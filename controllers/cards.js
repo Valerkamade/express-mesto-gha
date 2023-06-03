@@ -1,4 +1,4 @@
-const Card = require('../models/card'); 
+const Card = require('../models/card');
 const {
   ERROR_INCORRECT_DATA,
   ERROR_NOT_FOUND,
@@ -36,15 +36,16 @@ module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(cardId,
     { $addToSet: { likes: _id } },
     { new: true })
-    .then(card => res.send(card))
+    .then(card => {
+      if (!card) {
+        return res.status(ERROR_NOT_FOUND)
+          .send({ message: `Передан не существующий id:${cardId} карточки` });
+      }
+      res.send(card)
+    })
     .catch(err => {
       console.log(err);
       if (!Card[cardId]) {
-        res.status(ERROR_NOT_FOUND)
-          // .send({ message: `Передан не существующий id:${cardId} карточки` });
-           .send({ message: Card.likes });
-        return;
-      } else if (!Card[cardId]) {
         res.status(ERROR_INCORRECT_DATA)
           .send({ message: `Переданы некорректные данные для постановки лайка` });
         return;
@@ -60,13 +61,16 @@ module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(cardId,
     { $pull: { likes: _id } },
     { new: true })
-    .then(card => res.send(card))
-    .catch(err => {
-      if (!Card[_id]) {
+    .then(card => {
+      if (!card) {
         res.status(ERROR_NOT_FOUND)
           .send({ message: `Передан не существующий id:${_id} карточки` });
         return;
-      } else if (!id) {
+      }
+      res.send(card)
+    })
+    .catch(err => {
+      if (!Card[_id]) {
         res.status(ERROR_INCORRECT_DATA)
           .send({ message: `Переданы некорректные данные для снятия лайка` });
         return;
