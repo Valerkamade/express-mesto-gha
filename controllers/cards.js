@@ -22,7 +22,7 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(STATUS_OK).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_INCORRECT_DATA)
+        res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные при создании пользователя' });
       } else {
         res.status(ERROR_DEFAULT)
@@ -43,13 +43,13 @@ module.exports.likeCard = (req, res) => {
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_INCORRECT_DATA)
+        res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные для постановки лайка' });
       } else if (err.message === 'NotID') {
-        return res.status(ERROR_NOT_FOUND)
+        res.status(ERROR_NOT_FOUND)
           .send({ message: `Передан не существующий id:${cardId} карточки` });
       } else {
-        return res.status(ERROR_DEFAULT).send({ message: err.message });
+        res.status(ERROR_DEFAULT).send({ message: err.message });
       }
     });
 };
@@ -68,14 +68,13 @@ module.exports.dislikeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_INCORRECT_DATA)
+        res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные для снятия лайка' });
       } else if (err.message === 'NotID') {
-        return res.status(ERROR_NOT_FOUND)
+        res.status(ERROR_NOT_FOUND)
           .send({ message: `Передан не существующий id:${_id} карточки` });
-      } else {
-        return res.status(ERROR_DEFAULT).send({ message: err.message });
       }
+      res.status(ERROR_DEFAULT).send({ message: err.message });
     });
 };
 
@@ -86,12 +85,12 @@ module.exports.deleteCard = (req, res) => {
     .then(() => res.send({ message: 'Пост удалён' }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_INCORRECT_DATA)
+        res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные для удаления карточки' });
       } else if (err.message === 'NotID') {
-        return res.status(ERROR_NOT_FOUND).send({ message: `Карточка с указанным id: ${cardId} не найдена` });
+        res.status(ERROR_NOT_FOUND).send({ message: `Карточка с указанным id: ${cardId} не найдена` });
       } else {
-        return res.status(ERROR_DEFAULT).send({ message: err.message });
+        res.status(ERROR_DEFAULT).send({ message: err.message });
       }
     });
 };

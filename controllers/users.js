@@ -22,13 +22,13 @@ module.exports.getUser = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(ERROR_INCORRECT_DATA)
+        res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные для запроса пользователя' });
       } else if (err.message === 'NotID') {
-        return res.status(ERROR_NOT_FOUND)
+        res.status(ERROR_NOT_FOUND)
           .send({ message: `Пользователь по указанному id: ${userId} не найден` });
       } else {
-        return res.status(ERROR_DEFAULT)
+        res.status(ERROR_DEFAULT)
           .send({ message: err.message });
       }
     });
@@ -40,7 +40,7 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.status(STATUS_OK).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_INCORRECT_DATA)
+        res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные при создании пользователя' });
         // } else if (err.message) {
         //   res.status(ERROR_INCORRECT_DATA)
@@ -52,7 +52,7 @@ module.exports.createUser = (req, res) => {
         //     })
         //   return;
       } else {
-        return res.status(ERROR_DEFAULT).send({ message: err.message });
+        res.status(ERROR_DEFAULT).send({ message: err.message });
       }
     });
 };
@@ -67,13 +67,13 @@ module.exports.updateUserProfile = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_INCORRECT_DATA)
+        res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные при создании пользователя' });
       } else if (err.name === 'CastError') {
-        return res.status(ERROR_NOT_FOUND)
+        res.status(ERROR_NOT_FOUND)
           .send({ message: `Пользователь по указанному id:${_id} не найден` });
       } else {
-        return res.status(ERROR_DEFAULT).send({ message: err.message });
+        res.status(ERROR_DEFAULT).send({ message: err.message });
       }
     });
 };
@@ -88,13 +88,13 @@ module.exports.updateUserAvatar = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(ERROR_NOT_FOUND)
+        res.status(ERROR_NOT_FOUND)
           .send({ message: `Пользователь по указанному id:${_id} не найден` });
       } else if (err.name === 'ValidationError') {
-        return res.status(ERROR_INCORRECT_DATA)
+        res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные при создании пользователя' });
       } else {
-        return res.status(ERROR_DEFAULT).send({ message: err.message });
+        res.status(ERROR_DEFAULT).send({ message: err.message });
       }
     });
 };
