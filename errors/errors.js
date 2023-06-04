@@ -5,5 +5,5 @@ const ERROR_DEFAULT = 500;
 module.exports = {
   ERROR_INCORRECT_DATA,
   ERROR_NOT_FOUND,
-  ERROR_DEFAULT
-}
+  ERROR_DEFAULT,
+};
