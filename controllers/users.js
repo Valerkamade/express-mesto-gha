@@ -24,13 +24,13 @@ module.exports.getUser = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные для запроса пользователя' });
-      }
-      if (err.message === 'NotID') {
+      } else if (err.message === 'NotID') {
         return res.status(ERROR_NOT_FOUND)
           .send({ message: `Пользователь по указанному id: ${userId} не найден` });
+      } else {
+        return res.status(ERROR_DEFAULT)
+          .send({ message: err.message });
       }
-      return res.status(ERROR_DEFAULT)
-        .send({ message: err.message });
     });
 };
 
@@ -42,7 +42,6 @@ module.exports.createUser = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные при создании пользователя' });
-
         // } else if (err.message) {
         //   res.status(ERROR_INCORRECT_DATA)
         //     .send({
@@ -52,8 +51,9 @@ module.exports.createUser = (req, res) => {
         //       }, []).join('. ')
         //     })
         //   return;
+      } else {
+        return res.status(ERROR_DEFAULT).send({ message: err.message });
       }
-      return res.status(ERROR_DEFAULT).send({ message: err.message });
     });
 };
 
@@ -69,11 +69,12 @@ module.exports.updateUserProfile = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные при создании пользователя' });
-      } if (err.name === 'CastError') {
+      } else if (err.name === 'CastError') {
         return res.status(ERROR_NOT_FOUND)
           .send({ message: `Пользователь по указанному id:${_id} не найден` });
+      } else {
+        return res.status(ERROR_DEFAULT).send({ message: err.message });
       }
-      return res.status(ERROR_DEFAULT).send({ message: err.message });
     });
 };
 
@@ -89,11 +90,11 @@ module.exports.updateUserAvatar = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(ERROR_NOT_FOUND)
           .send({ message: `Пользователь по указанному id:${_id} не найден` });
-      }
-      if (err.name === 'ValidationError') {
+      } else if (err.name === 'ValidationError') {
         return res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные при создании пользователя' });
+      } else {
+        return res.status(ERROR_DEFAULT).send({ message: err.message });
       }
-      return res.status(ERROR_DEFAULT).send({ message: err.message });
     });
 };
