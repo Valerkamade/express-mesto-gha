@@ -42,7 +42,7 @@ module.exports.likeCard = (req, res) => {
     .orFail(new Error('NotID'))
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные для постановки лайка' });
       } else if (err.message === 'NotID') {
@@ -61,20 +61,20 @@ module.exports.dislikeCard = (req, res) => {
     cardId,
     { $pull: { likes: _id } },
     { new: true },
-  )
-    .orFail(new Error('NotID'))
+  ).orFail(new Error('NotID'))
     .then((card) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERROR_INCORRECT_DATA)
-          .send({ message: 'Переданы некорректные данные для снятия лайка' });
-      } else if (err.message === 'NotID') {
+      if (err.message === 'NotID') {
         res.status(ERROR_NOT_FOUND)
           .send({ message: `Передан не существующий id:${_id} карточки` });
+      } else if (err.name === 'CastError') {
+        res.status(ERROR_INCORRECT_DATA)
+          .send({ message: 'Переданы некорректные данные для снятия лайка' });
+      } else {
+        res.status(ERROR_DEFAULT).send({ message: err.message });
       }
-      res.status(ERROR_DEFAULT).send({ message: err.message });
     });
 };
 
@@ -84,7 +84,7 @@ module.exports.deleteCard = (req, res) => {
     .orFail(new Error('NotID'))
     .then(() => res.send({ message: 'Пост удалён' }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные для удаления карточки' });
       } else if (err.message === 'NotID') {
