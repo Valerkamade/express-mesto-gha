@@ -1,14 +1,6 @@
 {
   "extends": "airbnb-base",
   "rules": {
-    "no-console": [
-      "error",
-      {
-        "allow": [
-          "log"
-        ]
-      }
-    ],
     "no-underscore-dangle": [
       "error",
       {

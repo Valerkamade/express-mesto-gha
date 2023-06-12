@@ -1,9 +1,12 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../utils/constants');
 const User = require('../models/user');
+const NotFoundError = require('../errors/not-found-err');
 const {
-  ERROR_INCORRECT_DATA,
-  ERROR_NOT_FOUND,
   ERROR_DEFAULT,
 } = require('../errors/errors');
+const IncorrectData = require('../errors/incorrect-data');
 
 const STATUS_OK = 201;
 
@@ -15,49 +18,41 @@ module.exports.getUsers = (req, res) => {
       .send({ message: err.message }));
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail(new Error('NotID'))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_INCORRECT_DATA)
-          .send({ message: 'Переданы некорректные данные для запроса пользователя' });
+        next(new IncorrectData('Переданы некорректные данные для запроса пользователя'));
       } else if (err.message === 'NotID') {
-        res.status(ERROR_NOT_FOUND)
-          .send({ message: `Пользователь по указанному id: ${userId} не найден` });
+        next(new NotFoundError(`Пользователь по указанному id: ${userId} не найден`));
       } else {
-        res.status(ERROR_DEFAULT)
-          .send({ message: err.message });
+        next(err);
       }
     });
 };
 
-module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+module.exports.createUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
     .then((user) => res.status(STATUS_OK).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_INCORRECT_DATA)
-          .send({ message: 'Переданы некорректные данные при создании пользователя' });
-        // } else if (err.message) {
-        //   res.status(ERROR_INCORRECT_DATA)
-        //     .send({
-        //       message: Object.keys(err.errors).reduce((acc, key) => {
-        //         acc.push(err.errors[`${key}`].message);
-        //         return acc
-        //       }, []).join('. ')
-        //     })
-        //   return;
+        next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
       } else {
         res.status(ERROR_DEFAULT).send({ message: err.message });
       }
     });
 };
 
-module.exports.updateUserProfile = (req, res) => {
+module.exports.updateUserProfile = (req, res, next) => {
   const { name, about } = req.body;
   const { _id } = req.user;
   User.findByIdAndUpdate(_id, { name, about }, {
@@ -67,18 +62,16 @@ module.exports.updateUserProfile = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_INCORRECT_DATA)
-          .send({ message: 'Переданы некорректные данные при создании пользователя' });
+        next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
       } else if (err.name === 'CastError') {
-        res.status(ERROR_NOT_FOUND)
-          .send({ message: `Пользователь по указанному id:${_id} не найден` });
+        next(new NotFoundError(`Пользователь по указанному id:${_id} не найден`));
       } else {
         res.status(ERROR_DEFAULT).send({ message: err.message });
       }
     });
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const { _id } = req.user;
   User.findByIdAndUpdate(_id, { avatar }, {
@@ -88,13 +81,42 @@ module.exports.updateUserAvatar = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_NOT_FOUND)
-          .send({ message: `Пользователь по указанному id:${_id} не найден` });
+        next(new NotFoundError(`Пользователь по указанному id:${_id} не найден`));
       } else if (err.name === 'ValidationError') {
-        res.status(ERROR_INCORRECT_DATA)
-          .send({ message: 'Переданы некорректные данные при создании пользователя' });
+        next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
       } else {
         res.status(ERROR_DEFAULT).send({ message: err.message });
+      }
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+      res.cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true }).end();
+    })
+    .catch((err) => {
+      res
+        .status(401)
+        .send({ message: err.message });
+    });
+};
+
+module.exports.getCurrentUser = (req, res, next) => {
+  const { _id } = req.user;
+  User.findById(_id)
+    .orFail(new Error('NotID'))
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new IncorrectData('Переданы некорректные данные для запроса пользователя'));
+      } else if (err.message === 'NotID') {
+        next(new NotFoundError(`Пользователь по указанному id: ${_id} не найден`));
+      } else {
+        res.status(ERROR_DEFAULT)
+          .send({ message: err.message });
       }
     });
 };
