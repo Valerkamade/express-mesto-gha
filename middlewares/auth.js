@@ -17,7 +17,7 @@ module.exports.auth = (req, res, next) => {
     return handleAuthError(res);
   }
 
-  req.user = payload; // записываем пейлоуд в объект запроса
+  req.user = payload; // записать пейлоуд в объект запроса
 
-  return next(); // пропускаем запрос дальше
+  return next(); // пропустить запрос дальше
 };

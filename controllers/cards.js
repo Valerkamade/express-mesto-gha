@@ -1,10 +1,8 @@
 const Card = require('../models/card');
 
 const NotFoundError = require('../errors/not-found-err');
-const {
-  ERROR_DEFAULT,
-} = require('../errors/errors');
 const IncorrectData = require('../errors/incorrect-data');
+const {ERROR_DEFAULT} = require("../utils/constants");
 
 const STATUS_OK = 201;
 

@@ -4,12 +4,12 @@ module.exports = (err, req, res, next) => {
   const { statusCode = ERROR_DEFAULT, message } = err;
 
   res
-    .status(statusCode)
+    .status(statusCode) // выставить код статуса
     .send({
-      // проверяем статус и выставляем сообщение в зависимости от него
-      message: statusCode === 500
+      // проверить статус и выставить сообщение в зависимости от него
+      message: statusCode === ERROR_DEFAULT
         ? 'На сервере произошла ошибка'
         : message,
     });
-  next();
+  next(); // перенаправить на следующий обработчик
 };

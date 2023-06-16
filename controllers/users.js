@@ -1,14 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../utils/constants');
+const { JWT_SECRET, STATUS_OK, ERROR_DEFAULT} = require('../utils/constants');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
-const {
-  ERROR_DEFAULT,
-} = require('../errors/errors');
 const IncorrectData = require('../errors/incorrect-data');
-
-const STATUS_OK = 201;
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -38,6 +33,7 @@ module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
+  // console.log(email);
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
@@ -47,7 +43,7 @@ module.exports.createUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
       } else {
-        res.status(ERROR_DEFAULT).send({ message: err.message });
+        next(err);
       }
     });
 };
@@ -66,7 +62,7 @@ module.exports.updateUserProfile = (req, res, next) => {
       } else if (err.name === 'CastError') {
         next(new NotFoundError(`Пользователь по указанному id:${_id} не найден`));
       } else {
-        res.status(ERROR_DEFAULT).send({ message: err.message });
+        next(err);
       }
     });
 };
@@ -85,7 +81,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
       } else if (err.name === 'ValidationError') {
         next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
       } else {
-        res.status(ERROR_DEFAULT).send({ message: err.message });
+        next(err);
       }
     });
 };
@@ -95,7 +91,7 @@ module.exports.login = (req, res) => {
   User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-      res.cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true }).end();
+      res.cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true }).send('Авторизация прошла успешно');
     })
     .catch((err) => {
       res
@@ -115,8 +111,7 @@ module.exports.getCurrentUser = (req, res, next) => {
       } else if (err.message === 'NotID') {
         next(new NotFoundError(`Пользователь по указанному id: ${_id} не найден`));
       } else {
-        res.status(ERROR_DEFAULT)
-          .send({ message: err.message });
+        next(err);
       }
     });
 };

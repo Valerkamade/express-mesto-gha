@@ -4,6 +4,7 @@ class IncorrectData extends Error {
   constructor(message) {
     super(message);
     this.statusCode = ERROR_INCORRECT_DATA;
+    this.name = 'IncorrectData';
   }
 }
 
