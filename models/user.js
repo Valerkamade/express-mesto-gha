@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
-const { NotFoundAuth } = require('../errors/not-found-auth');
+const NotFoundAuth = require('../errors/not-found-auth');
 
 // Определение схемы пользователя
 const userSchema = new mongoose.Schema({

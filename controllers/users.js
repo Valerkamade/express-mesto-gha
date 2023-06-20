@@ -6,6 +6,7 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
 const IncorrectData = require('../errors/incorrect-data');
 const NotUniqueData = require('../errors/unique-data');
+// const NotFoundAuth = require('../errors/not-found-auth');
 
 const { ValidationError } = mongoose.Error;
 
@@ -52,9 +53,9 @@ module.exports.createUser = (req, res, next) => {
       }
     });
 };
-const updateUserData = (req, res, next) => {
+const updateUserData = (req, res, next, param) => {
   const { _id } = req.user;
-  User.findByIdAndUpdate(_id, req.body, { new: true, runValidators: true })
+  User.findByIdAndUpdate(_id, param, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err instanceof ValidationError) {
@@ -66,11 +67,13 @@ const updateUserData = (req, res, next) => {
 };
 
 module.exports.updateUserProfile = (req, res, next) => {
-  updateUserData(req, res, next);
+  const { name, about } = req.body;
+  updateUserData(req, res, next, { name, about });
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
-  updateUserData(req, res, next);
+  const { avatar } = req.body;
+  updateUserData(req, res, next, { avatar });
 };
 
 module.exports.login = (req, res, next) => {
