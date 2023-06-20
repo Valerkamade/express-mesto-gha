@@ -13,6 +13,7 @@ const {
 } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
 const responseError = require('./middlewares/response-error');
+const { validateUserCreate, validateUserAuth } = require('./utils/validate');
 
 // Назначить порт и создать приложение
 const { PORT = 3000 } = process.env;
@@ -26,8 +27,16 @@ app.use(cookieParser()); // для извлечения данных из кук
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
 // Запросы на авторизацию и регистрацию
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post(
+  '/signin',
+  validateUserAuth,
+  login,
+);
+app.post(
+  '/signup',
+  validateUserCreate,
+  createUser,
+);
 
 // Проверка авторизации
 app.use(auth);

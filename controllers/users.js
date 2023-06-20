@@ -1,12 +1,13 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {
-  JWT_SECRET, STATUS_OK, ERROR_DEFAULT, ERROR_INCORRECT_DATA, ERROR_PRESENCE,
+  JWT_SECRET, STATUS_OK, ERROR_DEFAULT, ERROR_PRESENCE,
 } = require('../utils/constants');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
 const IncorrectData = require('../errors/incorrect-data');
 const NotUniqueData = require('../errors/unique-data');
+const NotFoundAuth = require('../errors/not-found-auth');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -90,7 +91,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -105,9 +106,7 @@ module.exports.login = (req, res) => {
     })
     .catch((err) => {
       console.log(err);
-      res
-        .status(ERROR_INCORRECT_DATA)
-        .send({ message: err.message });
+      next(new NotFoundAuth(`Пользователь по указанному id: ${_id} не найден`));
     });
 };
 

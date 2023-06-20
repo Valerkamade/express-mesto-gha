@@ -6,11 +6,6 @@ module.exports.validateUser = celebrate({
   [Segments.BODY]: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-  }),
-});
-
-module.exports.validateUserAvatar = celebrate({
-  [Segments.BODY]: Joi.object().keys({
     avatar: Joi.string().pattern(regex),
   }),
 });
@@ -21,20 +16,36 @@ module.exports.validateUserID = celebrate({
   }),
 });
 
-module.exports.validateCardCreate = celebrate({
+module.exports.validateCardID = celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    cardId: Joi.string().id().hex().required(),
+  }),
+});
+
+module.exports.validateCard = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
     link: Joi.string().pattern(regex).required(),
   }),
 });
 
-module.exports.validateCardLink = celebrate({
+// module.exports.validateCardLink = celebrate({
+//   [Segments.BODY]: Joi.object().keys({
+//     link: Joi.string().pattern(regex),
+//   }),
+// });
+
+module.exports.validateUserCreate = celebrate({
   [Segments.BODY]: Joi.object().keys({
-    link: Joi.string().pattern(regex),
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().pattern(regex),
   }),
 });
 
-// module.exports.validateUserID = celebrate({
+// module.exports.validateUser = celebrate({
 //   [Segments.BODY]: Joi.object().keys({
 //     email: Joi.string().required().email(),
 //     password: Joi.string().required().min(8),
@@ -46,7 +57,7 @@ module.exports.validateCardLink = celebrate({
 //   }).unknown(),
 // });
 
-module.exports.validateUserLogin = celebrate({
+module.exports.validateUserAuth = celebrate({
   [Segments.BODY]: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),

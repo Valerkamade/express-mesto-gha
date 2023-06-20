@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { validateCardCreate } = require('../utils/validate');
+const { validateCard, validateCardID} = require('../utils/validate');
 const {
   getCards,
   deleteCard,
@@ -9,9 +9,13 @@ const {
 } = require('../controllers/cards');
 
 router.get('/', getCards); // запросить карточки
-router.post('/', validateCardCreate, createCard); // создать карточку
-router.put('/:cardId/likes', likeCard); // поставить лайк
-router.delete('/:cardId/likes', dislikeCard); // удалить лайк
-router.delete('/:cardId', deleteCard); // удалить карточку
+router.post(
+  '/',
+  validateCard,
+  createCard,
+); // создать карточку
+router.put('/:cardId/likes', validateCardID, likeCard); // поставить лайк
+router.delete('/:cardId/likes', validateCardID, dislikeCard); // удалить лайк
+router.delete('/:cardId', validateCardID, deleteCard); // удалить карточку
 
 module.exports = router;

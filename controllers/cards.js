@@ -2,16 +2,14 @@ const Card = require('../models/card');
 
 const NotFoundError = require('../errors/not-found-err');
 const IncorrectData = require('../errors/incorrect-data');
-const { ERROR_DEFAULT } = require('../utils/constants');
+const NotAccess = require('../errors/not-access');
+const { STATUS_OK } = require('../utils/constants');
 
-const STATUS_OK = 201;
-
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate(['name', 'link'])
     .then((cards) => res.send(cards))
-    .catch((err) => res.status(ERROR_DEFAULT)
-      .send({ message: err.message }));
+    .catch((err) => next(err));
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -23,8 +21,7 @@ module.exports.createCard = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
       } else {
-        res.status(ERROR_DEFAULT)
-          .send({ message: err.message });
+        next(err);
       }
     });
 };
@@ -45,7 +42,7 @@ module.exports.likeCard = (req, res, next) => {
       } else if (err.message === 'NotID') {
         next(new NotFoundError(`Передан не существующий id:${cardId} карточки`));
       } else {
-        res.status(ERROR_DEFAULT).send({ message: err.message });
+        next(err);
       }
     });
 };
@@ -63,11 +60,11 @@ module.exports.dislikeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.message === 'NotID') {
-        next(new NotFoundError(`Передан не существующий id:${_id} карточки`));
+        next(new NotFoundError(`Передан не существующий id:${cardId} карточки`));
       } else if (err.name === 'CastError') {
         next(new IncorrectData('Переданы некорректные данные для снятия лайка'));
       } else {
-        res.status(ERROR_DEFAULT).send({ message: err.message });
+        next(err);
       }
     });
 };
@@ -79,9 +76,9 @@ module.exports.deleteCard = (req, res, next) => {
     .orFail(new Error('NotID'))
     .then((card) => {
       if (card.owner.toString() !== _id) {
-        return Promise.reject(new Error('Нельзя удалять чужие карточки'));
+        return Promise.reject(new NotAccess('Нельзя удалять чужие карточки'));
       }
-      return Card.findByIdAndDelete(cardId)
+      return Card.findOneAndDelete(cardId)
         .then(() => res.send({ message: 'Пост удалён' }));
     })
     .catch((err) => {
@@ -90,7 +87,7 @@ module.exports.deleteCard = (req, res, next) => {
       } else if (err.message === 'NotID') {
         next(new NotFoundError(`Карточка с указанным id: ${cardId} не найдена`));
       } else {
-        res.status(ERROR_DEFAULT).send({ message: err.message });
+        next(err);
       }
     });
 };

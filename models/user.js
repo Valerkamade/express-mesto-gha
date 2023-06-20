@@ -22,10 +22,10 @@ const userSchema = new mongoose.Schema({
   },
   email: { // обязателдьное поле почта: уникальная строка
     type: String,
-    validate: {
-      validator: (v) => validator.isEmail(v),
-      // message: 'Введен некорректный адрес почты',
-    },
+    // validate: {
+    //   validator: (v) => validator.isEmail(v),
+    // message: 'Введен некорректный адрес почты',
+    // },
     // required: true,
     unique: true,
   },
