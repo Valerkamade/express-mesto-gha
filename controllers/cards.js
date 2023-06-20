@@ -11,7 +11,7 @@ module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate(['name', 'link'])
     .then((cards) => res.send(cards))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -38,7 +38,7 @@ module.exports.likeCard = (req, res, next) => {
   )
     .orFail(new NotFoundError(`Передан не существующий id:${cardId} карточки`))
     .then((card) => res.status(STATUS_OK).send(card))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.dislikeCard = (req, res, next) => {
@@ -52,7 +52,7 @@ module.exports.dislikeCard = (req, res, next) => {
     .then((card) => {
       res.send(card);
     })
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -67,5 +67,5 @@ module.exports.deleteCard = (req, res, next) => {
       return Card.deleteOne(card)
         .then(() => res.send({ message: 'Пост удалён' }));
     })
-    .catch((err) => next(err));
+    .catch(next);
 };

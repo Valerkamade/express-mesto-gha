@@ -13,15 +13,24 @@ module.exports.getUsers = (req, res, next) => {
   User.find({})
     .populate(['name', 'about', 'avatar'])
     .then((users) => res.send(users))
-    .catch((err) => next(err));
+    .catch(next);
+};
+
+const findById = (req, res, next, id) => {
+  User.findById(id)
+    .orFail(new NotFoundError(`Пользователь по указанному id: ${id} не найден`))
+    .then((user) => res.send(user))
+    .catch(next);
 };
 
 module.exports.getUser = (req, res, next) => {
   const { userId } = req.params;
-  User.findById(userId)
-    .orFail(new NotFoundError(`Пользователь по указанному id: ${userId} не найден`))
-    .then((user) => res.send(user))
-    .catch((err) => next(err));
+  findById(req, res, next, userId);
+};
+
+module.exports.getCurrentUser = (req, res, next) => {
+  const { _id } = req.user;
+  findById(req, res, next, _id);
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -43,48 +52,29 @@ module.exports.createUser = (req, res, next) => {
       }
     });
 };
-
-module.exports.updateUserProfile = (req, res, next) => {
-  const { name, about } = req.body;
+const updateUserData = (req, res, next) => {
   const { _id } = req.user;
-  User.findByIdAndUpdate(_id, { name, about }, {
-    new: true,
-    runValidators: true,
-  })
+  User.findByIdAndUpdate(_id, req.body, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
+      if (err instanceof ValidationError) {
+        next(new ValidationError('Переданы некорректные данные'));
       } else {
         next(err);
       }
     });
 };
 
+module.exports.updateUserProfile = (req, res, next) => {
+  updateUserData(req, res, next);
+};
+
 module.exports.updateUserAvatar = (req, res, next) => {
-  const { avatar } = req.body;
-  const { _id } = req.user;
-  User.findByIdAndUpdate(_id, { avatar }, {
-    new: true,
-    runValidators: true,
-  })
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
-      } else {
-        next(err);
-      }
-    });
+  updateUserData(req, res, next);
 };
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-
-  // if (!email || !password) {
-  //   res.status(ERROR_PRESENCE).send({ message: 'Введите почту и пароль' });
-  //   return;
-  // }
 
   User.findUserByCredentials(email, password)
     .then((user) => {
@@ -96,21 +86,5 @@ module.exports.login = (req, res, next) => {
       res.cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
         .send({ message: 'Авторизация прошла успешно' });
     })
-    .catch((err) => next(err));
-};
-
-module.exports.getCurrentUser = (req, res, next) => {
-  const { _id } = req.user;
-  User.findById(_id)
-    .orFail(new Error('NotID'))
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new IncorrectData('Переданы некорректные данные для запроса пользователя'));
-      } else if (err.message === 'NotID') {
-        next(new NotFoundError(`Пользователь по указанному id: ${_id} не найден`));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
