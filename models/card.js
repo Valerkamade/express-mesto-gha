@@ -4,8 +4,8 @@ const cardSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    minlength: [2, 'Слишком короткое название'],
-    maxlength: [30, 'Слишком длинное название'],
+    // minlength: [2, 'Слишком короткое название'],
+    // maxlength: [30, 'Слишком длинное название'],
   },
   link: {
     type: String,

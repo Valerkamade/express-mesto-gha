@@ -1,4 +1,4 @@
-[![Tests](../../actions/workflows/tests-13-sprint.yml/badge.svg)](../../actions/workflows/tests-13-sprint.yml) [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
+[![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
 # Проект Mesto фронтенд + бэкенд
 
 ### Проект реализован в рамках учебы в **Яндекс Практикум** на специальности **"Веб-разработчик"**.
@@ -13,11 +13,16 @@
   
 ---  
 ## Запросы
+*Autorization/registration*
+
+* `/signup` POST - регистрация нового пользователя;
+* `/signin` POST - авторизация зарегистрированного пользователя.
+
 *Users*
 
 * `/users`	GET/POST - запрос/создание пользоваетлей;
 * `/users/:userId`	GET - запрос пользователя по ***id***;
-* `/users/me`	PATCH - изменение основных данных пользователя: ***name***, ***about***;
+* `/users/me`	GET/PATCH - запрос/изменение основных данных пользователя: ***name***, ***about***;
 * `/users/me/avatar`	PATCH - изменение аватара пользователя: ***avatar***.
 
 *Cards*

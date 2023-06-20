@@ -1,18 +1,19 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const validator = require('validator');
 
 // Определение схемы пользователя
 const userSchema = new mongoose.Schema({
   name: { // имя пользователя: строка длиной от 2 до 30 символов, по умолчанию Жак-Ив Кусто
     type: String,
-    minlength: [2, 'Слишком короткое имя'],
-    maxlength: [30, 'Слишком длинное имя'],
+    // minlength: [2, 'Слишком короткое имя'],
+    // maxlength: [30, 'Слишком длинное имя'],
     default: 'Жак-Ив Кусто',
   },
   about: { // информация о пользователе: строка от 2 до 30 символов, по умолчанию Исследователь
     type: String,
-    minlength: [2, 'Маловато символов о себе'],
-    maxlength: [30, 'Многовато символов о себе'],
+    // minlength: [2, 'Маловато символов о себе'],
+    // maxlength: [30, 'Многовато символов о себе'],
     default: 'Исследователь',
   },
   avatar: { // ссылка на аватар пользователя: строка, имеет значение по усолчанию
@@ -21,18 +22,22 @@ const userSchema = new mongoose.Schema({
   },
   email: { // обязателдьное поле почта: уникальная строка
     type: String,
-    required: true,
+    validate: {
+      validator: (v) => validator.isEmail(v),
+      // message: 'Введен некорректный адрес почты',
+    },
+    // required: true,
     unique: true,
   },
   password: { // обязательное поле пароль: строка длиной от 8 символов, не передавать в схеме
     type: String,
     required: true,
-    minlength: [8, 'Слишком короткий пароль'],
+    // minlength: [8, 'Слишком короткий пароль'],
     select: false,
   },
 }, { versionKey: false });
 
-//
+// eslint-disable-next-line func-names
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
@@ -49,6 +54,13 @@ userSchema.statics.findUserByCredentials = function (email, password) {
           return user;
         });
     });
+};
+
+// eslint-disable-next-line func-names
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  return user;
 };
 
 module.exports = mongoose.model('user', userSchema);

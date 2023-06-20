@@ -1,9 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET, STATUS_OK, ERROR_DEFAULT} = require('../utils/constants');
+const {
+  JWT_SECRET, STATUS_OK, ERROR_DEFAULT, ERROR_INCORRECT_DATA, ERROR_PRESENCE,
+} = require('../utils/constants');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
 const IncorrectData = require('../errors/incorrect-data');
+const NotUniqueData = require('../errors/unique-data');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -33,14 +36,15 @@ module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  // console.log(email);
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
     .then((user) => res.status(STATUS_OK).send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.code === 11000) {
+        next(new NotUniqueData('Пользователь с такой почтой уже зарегистрирован'));
+      } else if (err.name === 'ValidationError') {
         next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
       } else {
         next(err);
@@ -88,14 +92,21 @@ module.exports.updateUserAvatar = (req, res, next) => {
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    res.status(ERROR_PRESENCE).send({ message: 'Введите почту и пароль' });
+    return;
+  }
+
   User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-      res.cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true }).send('Авторизация прошла успешно');
+      res.cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true }).send({ message: 'Авторизация прошла успешно' });
     })
     .catch((err) => {
+      console.log(err);
       res
-        .status(401)
+        .status(ERROR_INCORRECT_DATA)
         .send({ message: err.message });
     });
 };

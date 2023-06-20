@@ -2,7 +2,7 @@ const Card = require('../models/card');
 
 const NotFoundError = require('../errors/not-found-err');
 const IncorrectData = require('../errors/incorrect-data');
-const {ERROR_DEFAULT} = require("../utils/constants");
+const { ERROR_DEFAULT } = require('../utils/constants');
 
 const STATUS_OK = 201;
 
@@ -38,7 +38,7 @@ module.exports.likeCard = (req, res, next) => {
     { new: true },
   )
     .orFail(new Error('NotID'))
-    .then((card) => res.send(card))
+    .then((card) => res.status(STATUS_OK).send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new IncorrectData('Переданы некорректные данные для постановки лайка'));

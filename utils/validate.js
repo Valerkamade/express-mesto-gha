@@ -21,11 +21,17 @@ module.exports.validateUserID = celebrate({
   }),
 });
 
-module.exports.validateCard = celebrate({
+module.exports.validateCardCreate = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).min(30).required(),
-    link: Joi.string().required(),
-  }).unknown(),
+    name: Joi.string().min(2).max(30).required(),
+    link: Joi.string().pattern(regex).required(),
+  }),
+});
+
+module.exports.validateCardLink = celebrate({
+  [Segments.BODY]: Joi.object().keys({
+    link: Joi.string().pattern(regex),
+  }),
 });
 
 // module.exports.validateUserID = celebrate({
