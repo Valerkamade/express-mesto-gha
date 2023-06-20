@@ -6,6 +6,11 @@ module.exports.validateUser = celebrate({
   [Segments.BODY]: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
+  }),
+});
+
+module.exports.validateUserAvatar = celebrate({
+  [Segments.BODY]: Joi.object().keys({
     avatar: Joi.string().pattern(regex),
   }),
 });

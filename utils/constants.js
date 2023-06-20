@@ -6,6 +6,7 @@ const ERROR_ACCESS = 403;
 const ERROR_NOT_FOUND = 404;
 const ERROR_NOT_UNIQUE = 409;
 const ERROR_DEFAULT = 500;
+const ERROR_CODE_UNIQUE = 11000;
 
 module.exports = {
   JWT_SECRET,
@@ -16,4 +17,5 @@ module.exports = {
   ERROR_NOT_UNIQUE,
   ERROR_AUTH,
   ERROR_ACCESS,
+  ERROR_CODE_UNIQUE,
 };

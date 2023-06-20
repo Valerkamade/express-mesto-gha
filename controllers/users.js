@@ -1,36 +1,27 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const {
-  JWT_SECRET, STATUS_OK, ERROR_DEFAULT,
-} = require('../utils/constants');
+const mongoose = require('mongoose');
+const { JWT_SECRET, STATUS_OK, ERROR_CODE_UNIQUE } = require('../utils/constants');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
 const IncorrectData = require('../errors/incorrect-data');
 const NotUniqueData = require('../errors/unique-data');
-const NotFoundAuth = require('../errors/not-found-auth');
 
-module.exports.getUsers = (req, res) => {
+const { ValidationError } = mongoose.Error;
+
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .populate(['name', 'about', 'avatar'])
     .then((users) => res.send(users))
-    .catch((err) => res.status(ERROR_DEFAULT)
-      .send({ message: err.message }));
+    .catch((err) => next(err));
 };
 
 module.exports.getUser = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail(new Error('NotID'))
+    .orFail(new NotFoundError(`Пользователь по указанному id: ${userId} не найден`))
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new IncorrectData('Переданы некорректные данные для запроса пользователя'));
-      } else if (err.message === 'NotID') {
-        next(new NotFoundError(`Пользователь по указанному id: ${userId} не найден`));
-      } else {
-        next(err);
-      }
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -41,11 +32,11 @@ module.exports.createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.status(STATUS_OK).send(user))
+    .then((user) => res.status(STATUS_OK).send(user.toJSON()))
     .catch((err) => {
-      if (err.code === 11000) {
+      if (err.code === ERROR_CODE_UNIQUE) {
         next(new NotUniqueData('Пользователь с такой почтой уже зарегистрирован'));
-      } else if (err.name === 'ValidationError') {
+      } else if (err instanceof ValidationError) {
         next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
       } else {
         next(err);
@@ -64,8 +55,6 @@ module.exports.updateUserProfile = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
-      } else if (err.name === 'CastError') {
-        next(new NotFoundError(`Пользователь по указанному id:${_id} не найден`));
       } else {
         next(err);
       }
@@ -81,9 +70,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
   })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new NotFoundError(`Пользователь по указанному id:${_id} не найден`));
-      } else if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
       } else {
         next(err);
@@ -109,9 +96,7 @@ module.exports.login = (req, res, next) => {
       res.cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
         .send({ message: 'Авторизация прошла успешно' });
     })
-    .catch(() => {
-      next(new NotFoundAuth('Пользователь не найден'));
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.getCurrentUser = (req, res, next) => {

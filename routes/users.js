@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { validateUser, validateUserID } = require('../utils/validate');
+const { validateUser, validateUserID, validateUserAvatar } = require('../utils/validate');
 const {
   getUsers,
   getUser,
@@ -22,7 +22,7 @@ router.patch( // изменить данные пользователя name и 
 );
 router.patch( // изменить аватар пользователя
   '/me/avatar',
-  validateUser,
+  validateUserAvatar,
   updateUserAvatar,
 );
 

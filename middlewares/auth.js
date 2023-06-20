@@ -1,11 +1,8 @@
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET, ERROR_AUTH } = require('../utils/constants');
+const { JWT_SECRET } = require('../utils/constants');
+const { NotFoundAuth } = require('../errors/not-found-auth');
 
-const handleAuthError = (res) => {
-  res
-    .status(ERROR_AUTH)
-    .send({ message: 'Необходима авторизация' });
-};
+const handleAuthError = (req, res, next) => next(new NotFoundAuth('Необходима авторизация'));
 
 module.exports.auth = (req, res, next) => {
   const { token } = req.cookies;
@@ -14,7 +11,7 @@ module.exports.auth = (req, res, next) => {
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    return handleAuthError(res);
+    return handleAuthError(req, res, next);
   }
 
   req.user = payload; // записать пейлоуд в объект запроса
