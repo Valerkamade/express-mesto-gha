@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { validateCard, validateCardID} = require('../utils/validate');
+const { validateCard, validateCardID } = require('../utils/validate');
 const {
   getCards,
   deleteCard,

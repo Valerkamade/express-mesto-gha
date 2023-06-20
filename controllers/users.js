@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {
-  JWT_SECRET, STATUS_OK, ERROR_DEFAULT, ERROR_PRESENCE,
+  JWT_SECRET, STATUS_OK, ERROR_DEFAULT,
 } = require('../utils/constants');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
@@ -94,19 +94,23 @@ module.exports.updateUserAvatar = (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    res.status(ERROR_PRESENCE).send({ message: 'Введите почту и пароль' });
-    return;
-  }
+  // if (!email || !password) {
+  //   res.status(ERROR_PRESENCE).send({ message: 'Введите почту и пароль' });
+  //   return;
+  // }
 
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-      res.cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true }).send({ message: 'Авторизация прошла успешно' });
+      const token = jwt.sign(
+        { _id: user._id },
+        JWT_SECRET,
+        { expiresIn: '7d' },
+      );
+      res.cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
+        .send({ message: 'Авторизация прошла успешно' });
     })
-    .catch((err) => {
-      console.log(err);
-      next(new NotFoundAuth(`Пользователь по указанному id: ${_id} не найден`));
+    .catch(() => {
+      next(new NotFoundAuth('Пользователь не найден'));
     });
 };
 
