@@ -28,31 +28,27 @@ module.exports.createCard = (req, res, next) => {
     });
 };
 
-module.exports.likeCard = (req, res, next) => {
-  const { _id } = req.user;
+function updateCard(req, res, next, operation) {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(
     cardId,
-    { $addToSet: { likes: _id } },
-    { new: true },
-  )
-    .orFail(new NotFoundError(`Передан не существующий id:${cardId} карточки`))
-    .then((card) => res.status(STATUS_OK).send(card))
-    .catch(next);
-};
-
-module.exports.dislikeCard = (req, res, next) => {
-  const { _id } = req.user;
-  const { cardId } = req.params;
-  Card.findByIdAndUpdate(
-    cardId,
-    { $pull: { likes: _id } },
+    operation,
     { new: true },
   ).orFail(new NotFoundError(`Передан не существующий id:${cardId} карточки`))
     .then((card) => {
       res.send(card);
     })
     .catch(next);
+}
+
+module.exports.likeCard = (req, res, next) => {
+  const { _id } = req.user;
+  updateCard(req, res, next, { $addToSet: { likes: _id } });
+};
+
+module.exports.dislikeCard = (req, res, next) => {
+  const { _id } = req.user;
+  updateCard(req, res, next, { $pull: { likes: _id } });
 };
 
 module.exports.deleteCard = (req, res, next) => {

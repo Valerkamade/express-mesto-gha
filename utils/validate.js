@@ -4,26 +4,26 @@ const regex = /^(https?:\/\/)?[^\s]*\.(jpg|jpeg|png|gif|bmp|test)$/;
 
 module.exports.validateUser = celebrate({
   [Segments.BODY]: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
+    name: Joi.string().min(2).max(30).required(),
+    about: Joi.string().min(2).max(30).required(),
   }),
 });
 
 module.exports.validateUserAvatar = celebrate({
   [Segments.BODY]: Joi.object().keys({
-    avatar: Joi.string().pattern(regex),
+    avatar: Joi.string().pattern(regex).required(),
   }),
 });
 
 module.exports.validateUserID = celebrate({
   [Segments.PARAMS]: Joi.object().keys({
-    userId: Joi.string().id().hex().required(),
+    userId: Joi.string().length(24).hex().required(),
   }),
 });
 
 module.exports.validateCardID = celebrate({
   [Segments.PARAMS]: Joi.object().keys({
-    cardId: Joi.string().id().hex().required(),
+    cardId: Joi.string().length(24).hex().required(),
   }),
 });
 

@@ -12,7 +12,6 @@ const { ValidationError } = mongoose.Error;
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .populate(['name', 'about', 'avatar'])
     .then((users) => res.send(users))
     .catch(next);
 };
